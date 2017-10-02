@@ -16,7 +16,7 @@ TITLE XOR Encryption				(main.asm)
 ; To Do:
 ;	- Binary file support
 ;	- Better encryption key. (Single character is kind of lame and limiting)
-;	- Console file editing (READ, WRITE, CREATE)
+;	- Console file editing (READ, APPEND, WRITE, CREATE)
 ;
 ;
 ; Features:
