@@ -5,6 +5,7 @@ XOR Encryption/Decryption for Text Files
  * Binary to Text File Conversion
  * Better encryption key (single character is lame)
  * Basic Console File Editing (READ, APPEND, WRITE, CREATE)
+ * Become dependent from the Irvine library
  
 # Screenshots:
 ![01](https://user-images.githubusercontent.com/15623775/31103415-cd5695de-a7a4-11e7-90b3-8758950e8b71.PNG)
