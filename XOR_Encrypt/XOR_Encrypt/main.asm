@@ -44,37 +44,37 @@ BUFFER_SIZE = 50
 
 
 ; Macros:
-mGotoxy MACRO X:REQ, Y:REQ								; Reposition cursor to x,y position
-	PUSH EDX
-	MOV	 DH, Y
-	MOV	 DL, X
-	CALL Gotoxy
-	POP	 EDX
+mGotoxy MACRO X:REQ, Y:REQ							; Reposition cursor to x,y position
+	PUSH  EDX
+	MOV   DH, Y
+	MOV   DL, X
+	CALL  Gotoxy
+	POP   EDX
 ENDM
 
-mWrite MACRO text:REQ									; Write string literals.
+mWrite MACRO text:REQ								; Write string literals.
 	LOCAL string
 	.data
 		string BYTE text, 0
 	.code
-		PUSH EDX
-		MOV	 EDX, OFFSET string
-		CALL WriteString
-		POP	 EDX
+		PUSH 	EDX
+		MOV	EDX, OFFSET string
+		CALL 	WriteString
+		POP	EDX
 ENDM
 
 mWriteString MACRO buffer:REQ							; Write string variables
-	PUSH EDX
-	MOV	 EDX, OFFSET buffer
-	CALL WriteString
-	POP  EDX
+	PUSH  EDX
+	MOV   EDX, OFFSET buffer
+	CALL  WriteString
+	POP   EDX
 ENDM
 
-mReadString MACRO var:REQ								; Read string from console
+mReadString MACRO var:REQ							; Read string from console
 	PUSH ECX
 	PUSH EDX
-	MOV	 EDX, OFFSET var
-	MOV	 ECX, SIZEOF var
+	MOV  EDX, OFFSET var
+	MOV  ECX, SIZEOF var
 	CALL ReadString
 	POP  EDX
 	POP  ECX
@@ -83,12 +83,12 @@ ENDM
 BUFFER_SIZE = 5000
 
 .data
-	buffer				BYTE	BUFFER_SIZE		DUP(?)
-	filename			BYTE	80				DUP(0)
-	outputFileName		BYTE	80				DUP(0)
-	fileHandle			HANDLE	?
-	bytesRead			DWORD	?
-	encryptionKey		BYTE	?
+	buffer		BYTE	BUFFER_SIZE	DUP(?)
+	filename	BYTE	80		DUP(0)
+	outputFileName	BYTE	80		DUP(0)
+	fileHandle	HANDLE	?
+	bytesRead	DWORD	?
+	encryptionKey	BYTE	?
 .code
 
 
@@ -101,25 +101,25 @@ main ENDP
 ProgramLoop PROC
 	CALL	DrawTitleScreen
 	loop_begin:
-		CALL	ClrScr													; Main menu
+		CALL	ClrScr							; Main menu
 		mGotoxy 0,0
 		mWrite	"0) Encrypt/Decrypt a Text File [5000 BYTE MAX]"
 		CALL	Crlf
 		mWrite	"1) Exit Program"
 		CALL	Crlf
 		mWrite  "> "
-		CALL	ReadChar												; Get Menu selection
+		CALL	ReadChar						; Get Menu selection
 		CALL	WriteChar
 		CALL	Crlf
 		CALL	Crlf
 	ifEncryptText:
-		CMP		AL, '0'
-		JNE		ifEnd
+		CMP	AL, '0'
+		JNE	ifEnd
 		CALL	EncryptText
-		JMP		loop_begin
+		JMP	loop_begin
 	ifEnd:
-		CMP		AL, '1'
-		JNE		loop_begin
+		CMP	AL, '1'
+		JNE	loop_begin
 	loop_end:
 		mWrite  "Program Terminated."
 		mGotoxy 0,2
@@ -132,68 +132,68 @@ EncryptText PROC
 	mWrite  <"and use same encryption key.", 0dh, 0ah, 0dh, 0ah>
 	mWrite	"Enter a File Name for Input File [Required to already exist]: "
 	mReadString fileName
-	MOV		EDX,OFFSET filename
-	CALL	OpenInputFile												; Open user specified text file
-	MOV		fileHandle, EAX
-	CMP		EAX, INVALID_HANDLE_VALUE
-	JNE		file_ok					
+	MOV	EDX,OFFSET filename
+	CALL	OpenInputFile							; Open user specified text file
+	MOV	fileHandle, EAX
+	CMP	EAX, INVALID_HANDLE_VALUE
+	JNE	file_ok					
 	mWrite	<"Unable to find this text file.", 0dh, 0ah>
-	JMP		quit		
+	JMP	quit		
 
 	file_ok:
-		MOV		EDX, OFFSET buffer										; Read text file
-		MOV		ECX, BUFFER_SIZE
+		MOV	EDX, OFFSET buffer					; Read text file
+		MOV	ECX, BUFFER_SIZE
 		CALL	ReadFromFile
-		MOV		bytesRead, EAX
-		mWrite	"File size: "											; Print file size
+		MOV	bytesRead, EAX
+		mWrite	"File size: "						; Print file size
 		CALL	WriteDec
 		mWrite  " BYTES"
 		CALL	Crlf
-		JNC		check_buffer_size			
+		JNC	check_buffer_size			
 		mWrite	"Error reading file. "	
 		CALL	WriteWindowsMsg
-		JMP		close_file
+		JMP	close_file
 	check_buffer_size:
-		CMP		EAX, BUFFER_SIZE										; Is the buffer big enough?
-		JB		buf_size_ok				
+		CMP	EAX, BUFFER_SIZE				; Is the buffer big enough?
+		JB	buf_size_ok				
 		mWrite	<"Error: Buffer too small for the file", 0dh, 0ah>
-		JMP		quit					
+		JMP	quit					
 	buf_size_ok:	
-		MOV		buffer[EAX], 0		
-		mWrite	<"Original Buffer:", 0dh, 0ah, 0dh, 0ah>				; Prepare file for encryption
-		MOV		EDX, OFFSET buffer
+		MOV	buffer[EAX], 0		
+		mWrite	<"Original Buffer:", 0dh, 0ah, 0dh, 0ah>		; Prepare file for encryption
+		MOV	EDX, OFFSET buffer
 		CALL	WriteString
 		CALL	Crlf
-		mWrite  "Enter an Encryption Key [Single Character]: "			; Get Hex Encryption key
+		mWrite  "Enter an Encryption Key [Single Character]: "		; Get Hex Encryption key
 		CALL	ReadChar
 		CALL	WriteChar
-		MOV		DL, AL
+		MOV	DL, AL
 		CALL	Crlf
-		MOV		ESI, OFFSET buffer
-		MOV		ECX, bytesRead
+		MOV	ESI, OFFSET buffer
+		MOV	ECX, bytesRead
 	encrypt:
-		MOV		AL, BYTE PTR [ESI]										; XOR encrypt byte by byte
-		XOR		AL, DL								
-		MOV		BYTE PTR [ESI], AL
-		INC		ESI
+		MOV	AL, BYTE PTR [ESI]				; XOR encrypt byte by byte
+		XOR	AL, DL								
+		MOV	BYTE PTR [ESI], AL
+		INC	ESI
 		LOOP	encrypt
 	write_file:
 		mWrite	"Enter a File Name for Output File: "
 		mReadString outputFileName	
-		MOV		EDX, OFFSET buffer
+		MOV	EDX, OFFSET buffer
 		CALL	WriteString
 		CALL	Crlf
-		MOV		EDX, OFFSET outputFileName
-		CALL	CreateOutputFile										; Create user specified Output file
+		MOV	EDX, OFFSET outputFileName
+		CALL	CreateOutputFile					; Create user specified Output file
 		PUSH	EAX
-		MOV		EDX, OFFSET buffer
-		MOV		ECX, bytesRead
-		CALL	WriteToFile												; Write to Output file
-		POP		EAX
+		MOV	EDX, OFFSET buffer
+		MOV	ECX, bytesRead
+		CALL	WriteToFile						; Write to Output file
+		POP	EAX
 		CALL	CloseFile
 		CALL	Crlf
 	close_file:
-		MOV		EAX, fileHandle											; Close Output file
+		MOV	EAX, fileHandle						; Close Output file
 		CALL	CloseFile
 		mWrite	"Written to "
 		mWriteString outputFileName
