@@ -40,7 +40,7 @@ INCLUDE macros.inc
 
 
 ; Constants:
-BUFFER_SIZE = 50
+BUFFER_SIZE = 5000
 
 
 ; Macros:
@@ -79,8 +79,6 @@ mReadString MACRO var:REQ							; Read string from console
 	POP  EDX
 	POP  ECX
 ENDM
-
-BUFFER_SIZE = 5000
 
 .data
 	buffer		BYTE	BUFFER_SIZE	DUP(?)
